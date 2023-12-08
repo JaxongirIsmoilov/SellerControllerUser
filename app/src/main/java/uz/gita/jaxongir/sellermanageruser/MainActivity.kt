@@ -18,6 +18,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import uz.gita.jaxongir.sellermanageruser.presenter.login.LoginScreen
+import uz.gita.jaxongir.sellermanageruser.presenter.splash.SplashScreen
 import uz.gita.jaxongir.sellermanageruser.ui.theme.SellerManagerUserTheme
 import uz.gita.jaxongir.sellermanageruser.utills.navigation.AppNavigationHandler
 import javax.inject.Inject
@@ -32,7 +33,7 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             SellerManagerUserTheme {
-                Navigator(screen = LoginScreen()) { navigate ->
+                Navigator(screen = SplashScreen()) { navigate ->
                     navigationHandler.uiNavigator
                         .onEach { it.invoke(navigate) }
                         .launchIn(lifecycleScope)
