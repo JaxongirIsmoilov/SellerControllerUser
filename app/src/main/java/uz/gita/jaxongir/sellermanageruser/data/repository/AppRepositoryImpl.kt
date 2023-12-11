@@ -4,6 +4,7 @@ import android.util.Log
 import com.google.firebase.Firebase
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.google.firebase.database.database
 import com.google.firebase.firestore.firestore
@@ -22,9 +23,10 @@ class AppRepositoryImpl @Inject constructor(
 
     val firestore = Firebase.firestore
     val realtimeDatabase = Firebase.database.getReference("Products")
+    val realDb = FirebaseDatabase.getInstance()
     override fun login(name: String, password: String): Flow<Result<Unit>> = callbackFlow {
         firestore.collection("Sellers")
-            .whereEqualTo("sellerName", name)
+            .whereEqualTo("name", name)
             .get()
             .addOnSuccessListener {
                 if (it.documents.isEmpty()) {
@@ -45,37 +47,64 @@ class AppRepositoryImpl @Inject constructor(
         awaitClose()
     }
 
-    override fun editProducts(productsData: ProductData): Flow<String> = callbackFlow{
-        val updates = hashMapOf<String, Any?>(
-            "id" to productsData.id,
-            "name" to productsData.name,
-            "count" to productsData.count,
-            "initialPrice" to productsData.initialPrice,
-            "soldPrice" to productsData.soldPrice,
+    override fun getSoldProducts(name: String): Flow<List<ProductData>>  = callbackFlow{
+        realDb.getReference("Sellers").child(name)
+            .addValueEventListener(object : ValueEventListener {
+                override fun onDataChange(snapshot: DataSnapshot) {
+                    trySend(snapshot.children.map { it.toProductData() })
+                }
+
+                override fun onCancelled(error: DatabaseError) {}
+            })
+
+        awaitClose()
+    }
+
+    override suspend fun sellProduct(productData: ProductData) {
+        val productRef = realDb.getReference("Sellers").child(productData.sellerName).child(productData.name)
+
+        productRef.get().addOnSuccessListener { dataSnapshot ->
+            val currentCount = dataSnapshot.child("sellCount").getValue(Int::class.java) ?: 0
+            val newCount = currentCount + 1
+
+            val updates = hashMapOf<String, Any?>(
+                "id" to productData.id,
+                "name" to productData.name,
+                "sellCount" to newCount,
+                "initialPrice" to productData.initialPrice,
+                "soldPrice" to productData.soldPrice,
+                "isValid" to true,
+                "comment" to productData.comment,
+                "sellerName" to productData.sellerName
+            )
+
+            productRef.updateChildren(updates).addOnSuccessListener {
+
+            }
+
+
+        }.addOnFailureListener {
+
+        }
+
+
+        val oldProductRef = realDb.getReference("products").child(productData.name)
+
+        val oldUpdates = hashMapOf<String, Any?>(
+            "id" to productData.id,
+            "name" to productData.name,
+            "count" to --productData.count,
+            "initialPrice" to productData.initialPrice,
             "isValid" to true,
-            "comment" to productsData.comment,
+            "comment" to productData.comment,
+            "sellerName" to productData.sellerName
         )
-        realtimeDatabase.child(productsData.id).updateChildren(updates)
-            .addOnSuccessListener {
-                trySend("You have updated successfully")
-            }
-            .addOnFailureListener {
-                trySend(it.toString())
-            }
 
-        awaitClose()
+        oldProductRef.updateChildren(oldUpdates).addOnSuccessListener {
+
+        }
     }
 
-    override fun deleteProduct(productsData: ProductData): Flow<Result<String>> = callbackFlow{
-        realtimeDatabase.child(productsData.id)
-            .removeValue().addOnSuccessListener {
-                trySend(Result.success("Deleted successfully"))
-            }
-            .addOnFailureListener {
-                trySend(Result.failure(it))
-            }
-        awaitClose()
-    }
 
     override fun getAllProducts(): Flow<List<ProductData>> = callbackFlow{
         realtimeDatabase.addValueEventListener(object  : ValueEventListener{

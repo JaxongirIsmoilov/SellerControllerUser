@@ -11,6 +11,7 @@ data class ProductData(
     val isValid: Boolean,
     val comment: String,
     val sellerName: String,
+    val adminToken: String,
 )
 
 fun DataSnapshot.toProductData(): ProductData = ProductData(
@@ -21,5 +22,6 @@ fun DataSnapshot.toProductData(): ProductData = ProductData(
     soldPrice = child("soldPrice").getValue(Double::class.java) ?: 0.0,
     isValid = child("isValid").getValue(Boolean::class.java) ?: true,
     comment = child("comment").getValue(String::class.java) ?: "",
-    sellerName = child("sellerName").getValue(String::class.java) ?: ""
+    sellerName = child("sellerName").getValue(String::class.java) ?: "",
+    adminToken = child("adminToken").getValue(String::class.java) ?: ""
 )

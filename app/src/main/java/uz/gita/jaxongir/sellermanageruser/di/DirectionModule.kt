@@ -6,6 +6,8 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.components.ViewModelComponent
 import uz.gita.jaxongir.sellermanageruser.presenter.login.LoginDirection
 import uz.gita.jaxongir.sellermanageruser.presenter.login.LoginDirectionImpl
+import uz.gita.jaxongir.sellermanageruser.presenter.products.ProductsDirection
+import uz.gita.jaxongir.sellermanageruser.presenter.products.ProductsDirectionImpl
 import uz.gita.jaxongir.sellermanageruser.presenter.splash.SplashDirection
 import uz.gita.jaxongir.sellermanageruser.presenter.splash.SplashDirectionImpl
 import javax.inject.Singleton
@@ -18,5 +20,8 @@ interface DirectionModule {
 
     @Binds
     fun bindsLoginDirection(impl : LoginDirectionImpl) : LoginDirection
+
+    @Binds
+    fun bindsProductScreenDirection(impl : ProductsDirectionImpl) : ProductsDirection
 
 }

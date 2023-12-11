@@ -21,6 +21,6 @@ class SplashDirectionImpl @Inject constructor(
     }
 
     override suspend fun moveToProductScreen() {
-        appNavigator.addScreen(ProductScreen())
+        appNavigator.replaceScreen(ProductScreen())
     }
 }

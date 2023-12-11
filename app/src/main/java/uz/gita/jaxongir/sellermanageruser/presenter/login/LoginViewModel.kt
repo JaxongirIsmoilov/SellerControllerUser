@@ -16,7 +16,7 @@ import uz.gita.jaxongir.sellermanageruser.domain.repository.AppRepository
 import javax.inject.Inject
 
 @HiltViewModel
-class LoginViewModelImpl @Inject constructor(
+class LoginViewModel @Inject constructor(
     private val appRepository: AppRepository,
     private val loginDirection: LoginDirection,
     private val pref: MyPref
